@@ -37,7 +37,7 @@ BASE_HISTORY = {
 
 
 class Agent:
-    MODEL = "gemini-2.0-flash-001"
+    MODEL = "gemini-2.5-flash"
 
     _user_sessions: Dict[str, str]
     # aiohttp context
