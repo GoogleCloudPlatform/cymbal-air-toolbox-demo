@@ -1,4 +1,4 @@
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -222,38 +222,6 @@ def evaluate_response_phase(
         experiment=experiment_name,
     ).evaluate()
     return eval_result
-
-def evaluate_retrieval_trajectory_phase(
-    eval_datas: List[EvalData], experiment_name: str
-) -> evaluation_base.EvalResult:
-    """
-    Run evaluation for the tool use trajectory (sequence of tool calls)
-    using trajectory-based metrics.
-    """
-    predicted_trajectories = []
-    reference_trajectories = []
-
-    for e in eval_datas:
-        # Convert list of ToolCall objects to list of dictionaries
-        predicted_trajectories.append([t.model_dump() for t in e.llm_tool_calls])
-        reference_trajectories.append([t.model_dump() for t in e.tool_calls])
-
-    eval_dataset = pd.DataFrame(
-        {
-            "predicted_trajectory": predicted_trajectories,
-            "reference_trajectory": reference_trajectories,
-        }
-    )
-
-    # Run evaluation with trajectory metrics
-    print(f"\n--- Running Trajectory Evaluation for Experiment: {experiment_name}_trajectory ---")
-    eval_result = EvalTask(
-        dataset=eval_dataset,
-        metrics=retrieval_trajectory_metrics,
-        experiment=experiment_name + "_trajectory", # Use a distinct experiment name
-    ).evaluate()
-    return eval_result
-
 
 PROMPT = """The Cymbal Air Customer Service Assistant helps customers of Cymbal Air with their travel needs.Cymbal Air (airline unique two letter identifier as CY) is a passenger airline offering convenient flights to many cities around the world from itshub in San Francisco.
 Cymbal Air takes pride in using the latest technology to offer the best customerservice!
