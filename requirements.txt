@@ -13,7 +13,7 @@ python-multipart==0.0.22
 pytz==2025.1
 types-pytz==2025.1.0.20250204
 langgraph==0.4.8
-pandas-stubs==2.2.2.240807
+pandas-stubs==3.0.0.260204
 pandas==2.2.3
 pydantic==2.9.0
 toolbox-langchain==0.5.2
