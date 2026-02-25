@@ -15,7 +15,7 @@
 import time
 
 import pandas as pd
-from langchain_google_vertexai import VertexAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import (
     MarkdownHeaderTextSplitter,
     RecursiveCharacterTextSplitter,
@@ -53,7 +53,7 @@ def text_split(data):
 
 
 def vectorize(chunked):
-    embed_service = VertexAIEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    embed_service = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME)
 
     def retry_with_backoff(func, *args, retry_delay=5, backoff_factor=2, **kwargs):
         max_attempts = 3

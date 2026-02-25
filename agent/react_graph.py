@@ -25,7 +25,7 @@ from langchain_core.messages import (
 )
 from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig, RunnableLambda
-from langchain_google_vertexai import ChatVertexAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
@@ -163,7 +163,7 @@ async def create_graph(
         return {"messages": tool_messages}
 
     # model node
-    model = ChatVertexAI(max_output_tokens=512, model_name=model_name, temperature=0.0)
+    model = ChatGoogleGenerativeAI(max_output_tokens=512, model=model_name, temperature=0.0)
 
     # Bind the tools with the LLM.
     model_with_tools = model.bind_tools(tools)
