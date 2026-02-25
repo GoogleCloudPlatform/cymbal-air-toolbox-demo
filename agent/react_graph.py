@@ -163,7 +163,9 @@ async def create_graph(
         return {"messages": tool_messages}
 
     # model node
-    model = ChatGoogleGenerativeAI(max_output_tokens=512, model=model_name, temperature=0.0)
+    model = ChatGoogleGenerativeAI(
+        max_output_tokens=512, model=model_name, temperature=0.0
+    )
 
     # Bind the tools with the LLM.
     model_with_tools = model.bind_tools(tools)
@@ -292,7 +294,7 @@ async def create_graph(
     llm_graph.add_node(TOOL_NODE, tool_node)
     llm_graph.add_node(BOOKING_VALIDATION_NODE, RunnableLambda(booking_validation_node))
     llm_graph.add_node(INSERT_TICKET_NODE, RunnableLambda(insert_ticket_node))
-    llm_graph.add_node(REQUEST_LOGIN_NODE, request_login_node)
+    llm_graph.add_node(REQUEST_LOGIN_NODE, RunnableLambda(request_login_node))
 
     # Set agent node as the first node to call
     llm_graph.set_entry_point(AGENT_NODE)

@@ -256,7 +256,7 @@ def clear_user_info(session: dict[str, Any]):
 
 def init_app(
     client_id: Optional[str],
-    middleware_secret: Optional[str],
+    middleware_secret: str,
 ) -> FastAPI:
     # FastAPI setup
     app = FastAPI(lifespan=lifespan)
