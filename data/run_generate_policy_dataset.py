@@ -53,7 +53,9 @@ def text_split(data):
 
 
 def vectorize(chunked):
-    embed_service = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME, vertexai=True)
+    embed_service = GoogleGenerativeAIEmbeddings(
+        model=EMBEDDING_MODEL_NAME, vertexai=True
+    )
 
     def retry_with_backoff(func, *args, retry_delay=5, backoff_factor=2, **kwargs):
         max_attempts = 3
