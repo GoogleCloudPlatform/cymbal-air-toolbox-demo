@@ -23,7 +23,7 @@ EMBEDDING_MODEL_NAME = "gemini-embedding-001"
 
 
 async def main() -> None:
-    embed_service = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME)
+    embed_service = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL_NAME, vertexai=True)
 
     amenities: list[Amenity] = []
     with open("data/amenity_dataset.csv", "r") as f:

@@ -164,7 +164,7 @@ async def create_graph(
 
     # model node
     model = ChatGoogleGenerativeAI(
-        max_output_tokens=512, model=model_name, temperature=0.0
+        max_output_tokens=512, model=model_name, temperature=0.0, vertexai=True
     )
 
     # Bind the tools with the LLM.
