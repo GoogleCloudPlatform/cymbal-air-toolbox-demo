@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from vertexai.evaluation import MetricPromptTemplateExamples, PointwiseMetric
+from vertexai.preview.evaluation import MetricPromptTemplateExamples, PointwiseMetric
 
 text_quality_metric = PointwiseMetric(
     metric="text_quality",
@@ -37,4 +37,11 @@ retrieval_phase_metrics = [
     "tool_name_match",
     "tool_parameter_key_match",
     "tool_parameter_kv_match",
+]
+
+retrieval_trajectory_metrics = [
+    "trajectory_exact_match",
+    "trajectory_in_order_match",
+    "trajectory_precision",
+    "trajectory_recall",
 ]

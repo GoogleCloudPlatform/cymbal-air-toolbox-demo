@@ -24,6 +24,7 @@ from google.oauth2.id_token import fetch_id_token
 from evaluation import (
     evaluate_response_phase,
     evaluate_retrieval_phase,
+    evaluate_retrieval_trajectory_phase,
     goldens,
     run_llm_for_eval,
 )
@@ -37,12 +38,13 @@ except ImportError as e:
     LangGraphAgent = None
 
 
-def export_metrics_table_csv(retrieval: pd.DataFrame, response: pd.DataFrame):
+def export_metrics_table_csv(retrieval: pd.DataFrame, response: pd.DataFrame, trajectory: pd.DataFrame):
     """
     Export detailed metrics table to csv file
     """
     retrieval.to_csv("retrieval_eval.csv")
     response.to_csv("response_eval.csv")
+    trajectory.to_csv("trajectory_eval.csv")
 
 
 def fetch_user_id_token(client_id: str):
@@ -62,6 +64,9 @@ async def main():
     )
     RESPONSE_EXPERIMENT_NAME = os.getenv(
         "RESPONSE_EXPERIMENT_NAME", default="response-phase-eval"
+    )
+    TRAJECTORY_EXPERIMENT_NAME = os.getenv(
+        "TRAJECTORY_EXPERIMENT_NAME", default="retrieval-trajectory-eval"
     )
 
     ORCHESTRATION_TYPE = "langgraph"
@@ -125,9 +130,15 @@ async def main():
         eval_lists, RESPONSE_EXPERIMENT_NAME
     )
 
+    print("Evaluating retrieval trajectory phase...")
+    trajectory_eval_results = evaluate_retrieval_trajectory_phase(
+        eval_lists, TRAJECTORY_EXPERIMENT_NAME
+    )
+
     print("\n--- Evaluation Results ---")
     print(f"Retrieval phase eval results: {retrieval_eval_results.summary_metrics}")
     print(f"Response phase eval results: {response_eval_results.summary_metrics}")
+    print(f"Trajectory phase eval results: {trajectory_eval_results.summary_metrics}")
     print("--------------------------\n")
 
     if EXPORT_CSV:
@@ -135,6 +146,8 @@ async def main():
         export_metrics_table_csv(
             retrieval_eval_results.metrics_table,
             response_eval_results.metrics_table,
+            trajectory_eval_results.metrics_table,
+
         )
         print("Export complete.")
 

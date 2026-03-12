@@ -17,11 +17,11 @@ from typing import Any, Dict, List
 
 import pandas as pd
 from langchain_core.messages import AIMessage, ToolMessage, BaseMessage
-from vertexai.evaluation import EvalTask
-from vertexai.evaluation import _base as evaluation_base
+from vertexai.preview.evaluation import EvalTask
+from vertexai.preview.evaluation import _base as evaluation_base
 
 from .eval_golden import EvalData, ToolCall
-from .metrics import response_phase_metrics, retrieval_phase_metrics
+from .metrics import response_phase_metrics, retrieval_phase_metrics, retrieval_trajectory_metrics
 
 async def _run_llm_for_eval_langgraph(
     eval_list: List[EvalData], orc: Any, session: Dict, session_id: str
@@ -55,7 +55,7 @@ async def _run_llm_for_eval_langgraph(
                     print("ERROR: LangGraph - Orchestrator has no 'user_session_insert_ticket' method!")
 
         except Exception as e:
-            print(f"ERROR: LangGraph - Error invoking agent for query '{eval_data.query}': {e}", exc_info=True)
+            print(f"ERROR: LangGraph - Error invoking agent for query '{eval_data.query}': {e}")
             continue
         else:
             eval_data.llm_output = query_response.get("output")
@@ -223,8 +223,74 @@ def evaluate_response_phase(
     ).evaluate()
     return eval_result
 
-PROMPT = """The Cymbal Air Customer Service Assistant helps customers of Cymbal Air with their travel needs.Cymbal Air (airline unique two letter identifier as CY) is a passenger airline offering convenient flights to many cities around the world from itshub in San Francisco.
-Cymbal Air takes pride in using the latest technology to offer the best customerservice!
+def evaluate_retrieval_trajectory_phase(
+    eval_datas: List[EvalData], experiment_name: str
+) -> evaluation_base.EvalResult:
+    """
+    Run evaluation for the tool use trajectory using the preview SDK.
+    Includes padding to prevent API 400 errors on empty trajectories.
+    """
+    predicted_trajectories = []
+    reference_trajectories = []
+    responses = []
+    references = []        
+
+    # Define the dummy tool to bypass the empty list API restriction
+    NO_ACTION_TOOL = {"tool_name": "no_action_required", "tool_input": "{}"}
+
+    for e in eval_datas:
+        # 1. Translate PREDICTED tools
+        pred_list = []
+        for tc in e.llm_tool_calls:
+            pred_list.append({
+                "tool_name": tc.name,
+                "tool_input": json.dumps(tc.arguments)
+            })
+        # If the LLM didn't call any tools, insert the dummy tool
+        if not pred_list:
+            pred_list = [NO_ACTION_TOOL]
+
+        # 2. Translate REFERENCE tools
+        ref_list = []
+        for tc in e.tool_calls:
+            ref_list.append({
+                "tool_name": tc.name,
+                "tool_input": json.dumps(tc.arguments, sort_keys=True)
+            })
+        # If the Golden data expects no tools, insert the dummy tool
+        if not ref_list:
+            ref_list = [NO_ACTION_TOOL]
+
+        predicted_trajectories.append(json.dumps(pred_list))
+        reference_trajectories.append(json.dumps(ref_list))
+
+        # Format for standard CSV viewing (keeping your old setup intact)
+        references.append(json.dumps([t.model_dump() for t in e.tool_calls]))
+        responses.append(json.dumps([t.model_dump() for t in e.llm_tool_calls]))
+
+    # Build the dataframe
+    eval_dataset = pd.DataFrame(
+        {
+            "predicted_trajectory": predicted_trajectories,
+            "reference_trajectory": reference_trajectories,
+            "response": responses,
+            "reference": references,        
+        }
+    )
+
+    # Run evaluation 
+    print(f"\n--- Running Trajectory Evaluation for Experiment: {experiment_name}_trajectory ---")
+    eval_result = EvalTask(
+        dataset=eval_dataset,
+        metrics=retrieval_trajectory_metrics,
+        experiment=experiment_name + "-trajectory", 
+    ).evaluate()
+    
+    return eval_result
+
+
+PROMPT = """The Cymbal Air Customer Service Assistant helps customers of Cymbal Air with their travel needs. Cymbal Air (airline unique two letter identifier as CY) is a passenger airline offering convenient flights to many cities around the world from its hub in San Francisco.
+Cymbal Air takes pride in using the latest technology to offer the best customer service!
 Cymbal Air Customer Service Assistant (or just "Assistant" for short) is designed to assist with a wide range of tasks, from answering simple questions to complex multi-query questions that require passing results from one query to another.
 Using the latest AI models, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 The assistant should not answer questions about other peoples information for privacy reasons. Assistant is a powerful tool that can help answer a wide range of questions pertaining to travel on Cymbal Air as well as ammenities of San Francisco Airport.

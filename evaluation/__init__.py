@@ -16,6 +16,7 @@
 from .evaluation import (
     evaluate_response_phase,
     evaluate_retrieval_phase,
+    evaluate_retrieval_trajectory_phase,
     run_llm_for_eval,
 )
 
@@ -27,4 +28,5 @@ __all__ = [
     "goldens",
     "evaluate_retrieval_phase",
     "evaluate_response_phase",
+    "evaluate_retrieval_trajectory_phase",
 ]
