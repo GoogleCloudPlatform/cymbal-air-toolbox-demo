@@ -188,14 +188,14 @@ Your `tools.yaml` file must contain the following sections:
 
     Configure this section with a data source named `my-pg-instance` according to
     the **[official guide on configuring data
-    sources](https://googleapis.github.io/genai-toolbox/resources/sources/)**.
+    sources](https://mcp-toolbox.dev/integrations/)**.
 
 * **[Optional] An `authServices` section**
 
     Only required if you want to enable ticket-related features like booking or
     viewing a user's ticket history. To set it up, add a service named
     `my_google_service` by following the **[`authServices` configuration
-    guide](https://googleapis.github.io/genai-toolbox/resources/authservices/)**.
+    guide](https://mcp-toolbox.dev/documentation/configuration/authentication)**.
 
 * **The `tools` and `toolsets` sections**
 
