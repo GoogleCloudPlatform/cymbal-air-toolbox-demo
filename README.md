@@ -82,7 +82,7 @@ break down complex questions into smaller, manageable steps.
 The architecture consists of three main components:
 1. **Application** -- The user-facing agentic app that orchestrates the
    interaction between the user and the agent.
-1. **MCP Toolbox** -- [MCP Toolbox](https://github.com/googleapis/genai-toolbox)
+1. **MCP Toolbox** -- [MCP Toolbox](https://github.com/googleapis/mcp-toolbox)
    is a middleware server that exposes the database operations as a set of
    tools. The LLM agent connects to the Toolbox to execute these tools. This
    provides a secure, scalable, and modular way to manage database interactions.
@@ -131,7 +131,7 @@ First, clone this repository and download the MCP Toolbox binary.
       ```bash
       # See the releases page for the latest version
       export VERSION=0.8.0
-      curl -O https://storage.googleapis.com/genai-toolbox/v$VERSION/linux/amd64/toolbox
+      curl -O https://storage.googleapis.com/mcp-toolbox/v$VERSION/linux/amd64/toolbox
       chmod +x toolbox
       ```
 
