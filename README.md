@@ -131,7 +131,7 @@ First, clone this repository and download the MCP Toolbox binary.
       ```bash
       # See the releases page for the latest version
       export VERSION=0.8.0
-      curl -O https://storage.googleapis.com/mcp-toolbox/v$VERSION/linux/amd64/toolbox
+      curl -O https://storage.googleapis.com/mcp-toolbox-for-databases/v$VERSION/linux/amd64/toolbox
       chmod +x toolbox
       ```
 
