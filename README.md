@@ -82,7 +82,7 @@ break down complex questions into smaller, manageable steps.
 The architecture consists of three main components:
 1. **Application** -- The user-facing agentic app that orchestrates the
    interaction between the user and the agent.
-1. **MCP Toolbox** -- [MCP Toolbox](https://github.com/googleapis/genai-toolbox)
+1. **MCP Toolbox** -- [MCP Toolbox](https://github.com/googleapis/mcp-toolbox)
    is a middleware server that exposes the database operations as a set of
    tools. The LLM agent connects to the Toolbox to execute these tools. This
    provides a secure, scalable, and modular way to manage database interactions.
@@ -105,7 +105,7 @@ Using the Toolbox as an intermediary offers several advantages:
    agent's ability to leverage it successfully.
 
 Head over to the official [MCP Toolbox
-docs](https://googleapis.github.io/genai-toolbox/getting-started/introduction/)
+docs](https://mcp-toolbox.dev)
 for more details.
 
 ## Deployment
@@ -126,12 +126,12 @@ First, clone this repository and download the MCP Toolbox binary.
 2.  **Download MCP Toolbox binary:**
 
       Follow [these
-      steps](https://googleapis.github.io/genai-toolbox/getting-started/introduction/#installing-the-server)
+      steps](https://mcp-toolbox.dev)
       to download the binary. This involves running the following commands:
       ```bash
       # See the releases page for the latest version
-      export VERSION=0.8.0
-      curl -O https://storage.googleapis.com/genai-toolbox/v$VERSION/linux/amd64/toolbox
+      export VERSION=1.1.0
+      curl -O https://storage.googleapis.com/mcp-toolbox-for-databases/v$VERSION/linux/amd64/toolbox
       chmod +x toolbox
       ```
 
@@ -161,7 +161,7 @@ For local development and testing, you can run the Toolbox server directly from
 your terminal. This is the quickest way to get started.
 
 **For instructions, follow the [guide to running the Toolbox
-locally](https://googleapis.github.io/genai-toolbox/getting-started/introduction/#getting-started).**
+locally](https://mcp-toolbox.dev).**
 
 The basic command will be:
 ```bash
@@ -175,7 +175,7 @@ service on Google Cloud Run. This provides a stable, shareable endpoint for your
 application.
 
 **For instructions, follow the [guide to deploying the Toolbox on Cloud
-Run](https://googleapis.github.io/genai-toolbox/how-to/deploy_toolbox/)**.
+Run](https://mcp-toolbox.dev/documentation/deploy-to/)**.
 
 ### Running the Agentic Application
 
@@ -194,5 +194,5 @@ the MCP Toolbox configuration file.
 Please refer to the [MCP Toolbox documentation][configure] for more information on creating
 and configuring tools.
 
-[toolbox]: (https://googleapis.github.io/genai-toolbox/getting-started/introduction/#getting-started)
-[configure]: (https://googleapis.github.io/genai-toolbox/getting-started/configure/)
+[toolbox]: (https://mcp-toolbox.dev)
+[configure]: (https://mcp-toolbox.dev/documentation/configuration/)
