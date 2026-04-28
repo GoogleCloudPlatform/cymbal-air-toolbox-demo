@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/googlecloudplatform-cymbal-air-toolbox-demo-badge.png)](https://mseep.ai/app/googlecloudplatform-cymbal-air-toolbox-demo)
+
 # ![](static/logo-header.png)
 
 > [!NOTE]
