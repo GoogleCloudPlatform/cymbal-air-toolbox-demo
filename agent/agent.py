@@ -52,7 +52,7 @@ class Agent:
         return uuid in self._user_sessions
 
     async def user_session_insert_ticket(self, uuid: str) -> Any:
-        return await self.user_session_invoke(uuid, None)
+        return await self.user_session_invoke(uuid, None, booking_type="confirm")
 
     async def user_session_decline_ticket(self, uuid: str) -> dict[str, Any]:
         config = self.get_config(uuid)
@@ -67,7 +67,7 @@ class Agent:
             content="I changed my mind. Decline ticket booking."
         )
         self._langgraph_app.update_state(config, {"messages": [human_message]})
-        return await self.user_session_invoke(uuid, None)
+        return await self.user_session_invoke(uuid, None, booking_type="decline")
 
     async def user_session_create(self, session: dict[str, Any]):
         """Create and load an agent executor with tools and LLM."""
@@ -101,7 +101,7 @@ class Agent:
         self._user_sessions[session_id] = ""
 
     async def user_session_invoke(
-        self, uuid: str, user_prompt: Optional[str]
+        self, uuid: str, user_prompt: Optional[str], booking_type: Optional[str] = None
     ) -> dict[str, Any]:
         config = self.get_config(uuid)
         cur_message_index = (
@@ -112,10 +112,41 @@ class Agent:
             app_input = {"messages": user_query}
         else:
             app_input = None
-        final_state = await self._langgraph_app.ainvoke(
-            app_input,
-            config=config,
-        )
+        try:
+
+            final_state = await self._langgraph_app.ainvoke(
+                app_input,
+                config=config,
+            )
+        except Exception as e:
+            print(f"Error invoking LangGraph: {e}")
+
+            if user_prompt:
+                error_message = "Sorry, we couldn't answer your question 😢"
+                messages_to_add = [
+                    HumanMessage(content=user_prompt),
+                    AIMessage(content=error_message),
+                ]
+            elif booking_type == "confirm":
+                error_message = "Sorry, flight booking failed. 😢"
+                messages_to_add = [
+                    HumanMessage(content="Looks good to me. Book it!"),
+                    AIMessage(content=error_message),
+                ]
+            elif booking_type == "decline":
+                error_message = "Sorry, something went wrong. 😢"
+                messages_to_add = [AIMessage(content=error_message)]
+            else:
+                error_message = "Sorry, something went wrong. 😢"
+                messages_to_add = [AIMessage(content=error_message)]
+            self._langgraph_app.update_state(config, {"messages": messages_to_add})
+            response = {
+                "output": error_message,
+                "trace": [],
+                "state": self._langgraph_app.get_state(config).values,
+            }
+            return response
+
         messages = final_state["messages"]
         # Retrieve tracing information
         trace = self.retrieve_trace(messages[cur_message_index:])
