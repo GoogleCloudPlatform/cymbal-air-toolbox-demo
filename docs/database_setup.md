@@ -186,9 +186,9 @@ Your `tools.yaml` file must contain the following sections:
 
 * **A `sources` section**
 
-    Configure this section with a data source named `my-pg-instance` according to
+    Configure this section with your data source according to
     the **[official guide on configuring data
-    sources](https://googleapis.github.io/genai-toolbox/resources/sources/)**.
+    sources](https://googleapis.github.io/genai-toolbox/resources/sources/)**. Make sure the source name here matches the `source` field in your tools definition (e.g., `my-pg-instance` in `tools.yaml` or `my-mysql-instance` in `tools_mysql.yaml`).
 
 * **[Optional] An `authServices` section**
 
@@ -200,7 +200,7 @@ Your `tools.yaml` file must contain the following sections:
 * **The `tools` and `toolsets` sections**
 
     You don't need to write these from scratch. Simply copy the `tools` and
-    `toolsets` sections directly from the [`tools.yaml`](../tools.yaml) file located
+    `toolsets` sections directly from the [`tools.yaml`](../tools.yaml) file (or [`tools_mysql.yaml`](../tools_mysql.yaml) if you are using MySQL) located
     in the root of this repository and paste them into your new configuration file.
 
 > [!TIP]
