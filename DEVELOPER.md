@@ -134,7 +134,7 @@ Create a Cloud Build trigger via the UI or `gcloud` with the following specs:
 
 1. Create a Cloud Build private pool
 1. Enable Secret Manager API
-1. Create secret, `db_user` and `db_pass`, with your database user and database password defined [here](https://googleapis.github.io/genai-toolbox/resources/sources/).
+1. Create secret, `db_user` and `db_pass`, with your database user and database password defined [here](https://mcp-toolbox.dev/documentation/configuration/#sources).
 
 1. Allow Cloud Build to access secret
 1. Add role Vertex AI User (`roles/aiplatform.user`) to Cloud Build Service
