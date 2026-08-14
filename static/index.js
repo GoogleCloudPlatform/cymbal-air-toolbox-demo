@@ -287,7 +287,7 @@ async function confirmTicket(id) {
     if (response.ok) {
         const text_response = await response.text();
         removeTicketChoices(id);
-        logMessage("ai", "<p>Your flight has been successfully booked.</p>")
+        logMessage("ai", text_response)
     } else {
         console.error(await response.text())
         removeTicketChoices(id);
