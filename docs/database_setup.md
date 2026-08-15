@@ -120,37 +120,37 @@ to allow for data initialization.
 
 * **For AlloyDB for Postgres:**
   ```bash
-  ./toolbox --prebuilt alloydb-postgres
+  ./toolbox --prebuilt alloydb-postgres --enable-api
   ```
 
 * **For CloudSQL for Posgres:**
   ```bash
-  ./toolbox --prebuilt cloud-sql-postgres
+  ./toolbox --prebuilt cloud-sql-postgres --enable-api
   ```
 
 * **For Cloud SQL for MySQL:**
   ```bash
-  ./toolbox --prebuilt cloud-sql-mysql
+  ./toolbox --prebuilt cloud-sql-mysql --enable-api
   ```
 
 * **For Cloud SQL for SQL Server:**
   ```bash
-  ./toolbox --prebuilt cloud-sql-mssql
+  ./toolbox --prebuilt cloud-sql-mssql --enable-api
   ```
 
 * **For BigQuery:**
   ```bash
-  ./toolbox --prebuilt bigquery
+  ./toolbox --prebuilt bigquery --enable-api
   ```
 
 * **For Spanner:**
   ```bash
-  ./toolbox --prebuilt spanner
+  ./toolbox --prebuilt spanner --enable-api
   ```
 
 * **For PostgreSQL:**
   ```bash
-  ./toolbox --prebuilt postgres
+  ./toolbox --prebuilt postgres --enable-api
   ```
 
 ### 4. Install the Dependencies
@@ -169,6 +169,7 @@ initialization script. This will populate your database with the Cymbal Air
 data.
 
 ```bash
+export PYTHONPATH=$PYTHONPATH:.
 python data/run_database_init.py
 ```
 
