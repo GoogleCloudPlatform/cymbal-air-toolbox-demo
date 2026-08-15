@@ -18,7 +18,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence
 
-from langchain.globals import set_verbose  # type: ignore
+from langchain_core.globals import set_verbose
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.checkpoint.base import empty_checkpoint

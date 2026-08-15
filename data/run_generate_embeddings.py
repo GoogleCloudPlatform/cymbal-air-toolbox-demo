@@ -15,7 +15,7 @@
 import asyncio
 import csv
 
-from langchain_google_vertexai import VertexAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 from models import Amenity, Policy
 
@@ -23,7 +23,9 @@ EMBEDDING_MODEL_NAME = "gemini-embedding-001"
 
 
 async def main() -> None:
-    embed_service = VertexAIEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    embed_service = GoogleGenerativeAIEmbeddings(
+        model=EMBEDDING_MODEL_NAME, vertexai=True
+    )
 
     amenities: list[Amenity] = []
     with open("data/amenity_dataset.csv", "r") as f:
