@@ -154,7 +154,7 @@ async def create_graph(
             # Create a ToolMessage with the result and original tool_call_id
             tool_messages.append(
                 ToolMessage(
-                    name=tool_to_run.name,
+                    name=tool_name,
                     content=output,
                     tool_call_id=tool_call["id"],
                 )
