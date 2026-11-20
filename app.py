@@ -14,6 +14,7 @@
 
 import json
 import os
+import secrets
 from contextlib import asynccontextmanager
 from typing import Any, Optional
 
@@ -256,8 +257,10 @@ def clear_user_info(session: dict[str, Any]):
 
 def init_app(
     client_id: Optional[str],
-    middleware_secret: Optional[str],
+    middleware_secret: str,
 ) -> FastAPI:
+    if not middleware_secret:
+        raise ValueError("middleware_secret must be a non-empty string")
     # FastAPI setup
     app = FastAPI(lifespan=lifespan)
     app.state.client_id = client_id
@@ -272,7 +275,7 @@ if __name__ == "__main__":
     PORT = int(os.getenv("PORT", default=8081))
     HOST = os.getenv("HOST", default="0.0.0.0")
     CLIENT_ID = os.getenv("CLIENT_ID")
-    MIDDLEWARE_SECRET = os.getenv("MIDDLEWARE_SECRET", default="this is a secret")
+    MIDDLEWARE_SECRET = os.getenv("MIDDLEWARE_SECRET") or secrets.token_urlsafe(32)
     app = init_app(client_id=CLIENT_ID, middleware_secret=MIDDLEWARE_SECRET)
     if app is None:
         raise TypeError("app not instantiated")

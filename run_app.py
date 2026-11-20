@@ -15,6 +15,7 @@
 
 import asyncio
 import os
+import secrets
 
 import uvicorn
 
@@ -25,7 +26,7 @@ async def main():
     PORT = int(os.getenv("PORT", default=8081))
     HOST = os.getenv("HOST", default="0.0.0.0")
     CLIENT_ID = os.getenv("CLIENT_ID")
-    MIDDLEWARE_SECRET = os.getenv("MIDDLEWARE_SECRET", default="this is a secret")
+    MIDDLEWARE_SECRET = os.getenv("MIDDLEWARE_SECRET") or secrets.token_urlsafe(32)
     app = init_app(client_id=CLIENT_ID, middleware_secret=MIDDLEWARE_SECRET)
     if app is None:
         raise TypeError("app not instantiated")
