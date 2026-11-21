@@ -14,7 +14,7 @@
 
 import json
 import uuid
-from typing import Annotated, Literal, Sequence, TypedDict
+from typing import Annotated, Any, Literal, Sequence, TypedDict
 
 from langchain_core.messages import (
     AIMessage,
@@ -83,6 +83,65 @@ def __get_tool_to_run(tool: ToolboxTool, config: RunnableConfig):
     return tool
 
 
+# A tool that legitimately returns zero rows (for example `list_tickets` for a
+# user who has not booked anything) comes back as an empty payload. Passing
+# that payload to the model as "null" reads like a failed call, and the agent
+# then answers that the tools lack the requested functionality instead of
+# saying there was nothing to return.
+# See https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/issues/642
+EMPTY_TOOL_RESULT_MESSAGE = "No results found."
+
+_EMPTY_TOOL_OUTPUTS = frozenset({"", "null", "none", "[]", "{}"})
+
+
+def _normalize_tool_output(output: Any) -> Any:
+    """
+    Replaces an empty tool result with an explicit "no results" message.
+
+    Non-empty results are returned unchanged so the model keeps seeing the
+    exact payload the tool produced.
+    """
+    if output is None:
+        return EMPTY_TOOL_RESULT_MESSAGE
+    if isinstance(output, str):
+        if output.strip().lower() in _EMPTY_TOOL_OUTPUTS:
+            return EMPTY_TOOL_RESULT_MESSAGE
+        return output
+    if isinstance(output, (list, tuple, dict)) and not output:
+        return EMPTY_TOOL_RESULT_MESSAGE
+    return output
+
+
+async def _build_tool_message(
+    tool_call: ToolCall, tools: Sequence[ToolboxTool], config: RunnableConfig
+) -> ToolMessage:
+    """
+    Runs a single tool call and wraps its result in a ToolMessage.
+    """
+    tool_name = tool_call["name"]
+    # Find the corresponding tool from the provided list
+    selected_tool = next((t for t in tools if t.name == tool_name), None)
+
+    if not selected_tool:
+        # Handle case where the model hallucinates a tool name
+        output: Any = f"Error: Tool '{tool_name}' not found."
+    else:
+        try:
+            tool_to_run: ToolboxTool = __get_tool_to_run(selected_tool, config)
+            # Manually invoke the tool with its arguments
+            output = _normalize_tool_output(
+                await tool_to_run.ainvoke(tool_call["args"])
+            )
+        except Exception as e:
+            output = f"Error executing tool {tool_name}: {e}"
+
+    return ToolMessage(
+        name=tool_name,
+        content=output,
+        tool_call_id=tool_call["id"],
+    )
+
+
 async def create_graph(
     tools: list[ToolboxTool],
     insert_ticket: ToolboxTool,
@@ -136,29 +195,8 @@ async def create_graph(
             return {"messages": []}
 
         for tool_call in last_message.tool_calls:
-            tool_name = tool_call["name"]
-            # Find the corresponding tool from the provided list
-            selected_tool = next((t for t in tools if t.name == tool_name), None)
-
-            if not selected_tool:
-                # Handle case where the model hallucinates a tool name
-                output = f"Error: Tool '{tool_name}' not found."
-            else:
-                try:
-                    tool_to_run: ToolboxTool = __get_tool_to_run(selected_tool, config)
-                    # Manually invoke the tool with its arguments
-                    output = await tool_to_run.ainvoke(tool_call["args"])
-                except Exception as e:
-                    output = f"Error executing tool {tool_name}: {e}"
-
             # Create a ToolMessage with the result and original tool_call_id
-            tool_messages.append(
-                ToolMessage(
-                    name=tool_to_run.name,
-                    content=output,
-                    tool_call_id=tool_call["id"],
-                )
-            )
+            tool_messages.append(await _build_tool_message(tool_call, tools, config))
 
         return {"messages": tool_messages}
 
