@@ -12,6 +12,12 @@ authServices:
   my_google_service:
     kind: google
     clientId: 706535509072-qa5v22ur8ik8o513b0538ufo0ne9jfn5.apps.googleusercontent.com
+embeddingModels:
+  gemini_embedding:
+    kind: gemini
+    model: gemini-embedding-001
+    project: retrieval-app-testing
+    location: us-central1
 tools:
   search_airports:
     kind: postgres-sql
@@ -106,11 +112,12 @@ tools:
       - name: query
         type: string
         description: Search query
+        embeddedBy: gemini_embedding
     statement: |
       SELECT name, description, location, terminal, category, hour
       FROM amenities
-      WHERE (embedding <=> embedding('gemini-embedding-001', $1)::vector) < 0.5
-      ORDER BY (embedding <=> embedding('gemini-embedding-001', $1)::vector)
+      WHERE (embedding <=> $1::vector) < 0.5
+      ORDER BY (embedding <=> $1::vector)
       LIMIT 5
   search_policies:
     kind: postgres-sql
@@ -124,11 +131,12 @@ tools:
       - name: query
         type: string
         description: Search query
+        embeddedBy: gemini_embedding
     statement: |
       SELECT content
       FROM policies
-      WHERE (embedding <=> embedding('gemini-embedding-001', $1)::vector) < 0.5
-      ORDER BY (embedding <=> embedding('gemini-embedding-001', $1)::vector)
+      WHERE (embedding <=> $1::vector) < 0.5
+      ORDER BY (embedding <=> $1::vector)
       LIMIT 5
   validate_ticket:
     kind: postgres-sql
