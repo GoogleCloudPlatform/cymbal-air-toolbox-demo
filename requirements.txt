@@ -16,4 +16,4 @@ langgraph==0.4.8
 pandas-stubs==3.0.0.260204
 pandas==3.0.0
 pydantic==2.9.0
-toolbox-langchain==0.5.3
+toolbox-langchain==1.0.0
