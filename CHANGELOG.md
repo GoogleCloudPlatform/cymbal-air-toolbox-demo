@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/compare/v0.5.0...v0.6.0) (2026-11-20)
+
+
+### Features
+
+* Update model from Gemini 2.0 to Gemini 2.5 Flash ([#585](https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/issues/585)) ([e26a466](https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/commit/e26a4667a716293e1fb8c0c446f4395a4defd7dc))
+
+
+### Bug Fixes
+
+* generate random default MIDDLEWARE_SECRET ([#683](https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/issues/683)) ([285b32d](https://github.com/GoogleCloudPlatform/cymbal-air-toolbox-demo/commit/285b32d1a8eeec853e31124a508f516944a04c6e))
+
 ## [0.5.0](https://github.com/GoogleCloudPlatform/genai-databases-retrieval-app/compare/v0.4.0...v0.5.0) (2025-09-26)
 
 
