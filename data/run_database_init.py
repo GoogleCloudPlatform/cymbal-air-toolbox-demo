@@ -77,8 +77,23 @@ async def initialize_data(
     async with ToolboxClient(TOOLBOX_URL) as toolbox:
         execute_sql = await toolbox.load_tool("execute_sql")
 
-        # If the table already exists, drop it to avoid conflicts
-        await execute_sql("DROP TABLE IF EXISTS airports CASCADE")
+        # Detect DB type
+        db_type = "postgres"
+        try:
+            version_result = await execute_sql("SELECT VERSION()")
+            version_str = str(version_result)
+            if "MySQL" in version_str:
+                db_type = "mysql"
+                print("Detected MySQL database")
+            else:
+                print("Detected PostgreSQL/AlloyDB database")
+        except Exception as e:
+            print(f"Could not determine DB type, assuming PostgreSQL: {e}")
+
+        if db_type == "mysql":
+            await execute_sql("DROP TABLE IF EXISTS airports")
+        else:
+            await execute_sql("DROP TABLE IF EXISTS airports CASCADE")
         # Create a new table
         await execute_sql("""
             CREATE TABLE airports(
@@ -100,14 +115,19 @@ async def initialize_data(
         await execute_sql(f"""INSERT INTO airports VALUES {", ".join(values)}""")
         print("Airports table initialized")
 
-        await execute_sql(
-            "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE"
-        )
-        await execute_sql("CREATE EXTENSION IF NOT EXISTS vector")
-        # If the table already exists, drop it to avoid conflicts
-        await execute_sql("DROP TABLE IF EXISTS amenities CASCADE")
+        if db_type == "postgres":
+            await execute_sql(
+                "CREATE EXTENSION IF NOT EXISTS google_ml_integration CASCADE"
+            )
+            await execute_sql("CREATE EXTENSION IF NOT EXISTS vector")
+            await execute_sql("DROP TABLE IF EXISTS amenities CASCADE")
+            embedding_type = "vector(3072)"
+        else:
+            await execute_sql("DROP TABLE IF EXISTS amenities")
+            embedding_type = "vector(3072) USING VARBINARY"
+
         # Create a new table
-        await execute_sql("""
+        await execute_sql(f"""
             CREATE TABLE amenities(
                 id INT PRIMARY KEY,
                 name TEXT,
@@ -131,40 +151,69 @@ async def initialize_data(
                 saturday_start_hour TIME,
                 saturday_end_hour TIME,
                 content TEXT NOT NULL,
-                embedding vector(3072) NOT NULL
+                embedding {embedding_type} NOT NULL
             )
         """)
         # Insert all the data
-        values = [f"""(
-            {__escape_sql(a.id)},
-            {__escape_sql(a.name)},
-            {__escape_sql(a.description)},
-            {__escape_sql(a.location)},
-            {__escape_sql(a.terminal)},
-            {__escape_sql(a.category)},
-            {__escape_sql(a.hour)},
-            {__escape_sql(a.sunday_start_hour)},
-            {__escape_sql(a.sunday_end_hour)},
-            {__escape_sql(a.monday_start_hour)},
-            {__escape_sql(a.monday_end_hour)},
-            {__escape_sql(a.tuesday_start_hour)},
-            {__escape_sql(a.tuesday_end_hour)},
-            {__escape_sql(a.wednesday_start_hour)},
-            {__escape_sql(a.wednesday_end_hour)},
-            {__escape_sql(a.thursday_start_hour)},
-            {__escape_sql(a.thursday_end_hour)},
-            {__escape_sql(a.friday_start_hour)},
-            {__escape_sql(a.friday_end_hour)},
-            {__escape_sql(a.saturday_start_hour)},
-            {__escape_sql(a.saturday_end_hour)},
-            {__escape_sql(a.content)},
-            {__escape_sql(a.embedding)}
-        )""" for a in amenities]
+        if db_type == "mysql":
+            values = [f"""(
+                {__escape_sql(a.id)},
+                {__escape_sql(a.name)},
+                {__escape_sql(a.description)},
+                {__escape_sql(a.location)},
+                {__escape_sql(a.terminal)},
+                {__escape_sql(a.category)},
+                {__escape_sql(a.hour)},
+                {__escape_sql(a.sunday_start_hour)},
+                {__escape_sql(a.sunday_end_hour)},
+                {__escape_sql(a.monday_start_hour)},
+                {__escape_sql(a.monday_end_hour)},
+                {__escape_sql(a.tuesday_start_hour)},
+                {__escape_sql(a.tuesday_end_hour)},
+                {__escape_sql(a.wednesday_start_hour)},
+                {__escape_sql(a.wednesday_end_hour)},
+                {__escape_sql(a.thursday_start_hour)},
+                {__escape_sql(a.thursday_end_hour)},
+                {__escape_sql(a.friday_start_hour)},
+                {__escape_sql(a.friday_end_hour)},
+                {__escape_sql(a.saturday_start_hour)},
+                {__escape_sql(a.saturday_end_hour)},
+                {__escape_sql(a.content)},
+                string_to_vector({__escape_sql(a.embedding)})
+            )""" for a in amenities]
+        else:
+            values = [f"""(
+                {__escape_sql(a.id)},
+                {__escape_sql(a.name)},
+                {__escape_sql(a.description)},
+                {__escape_sql(a.location)},
+                {__escape_sql(a.terminal)},
+                {__escape_sql(a.category)},
+                {__escape_sql(a.hour)},
+                {__escape_sql(a.sunday_start_hour)},
+                {__escape_sql(a.sunday_end_hour)},
+                {__escape_sql(a.monday_start_hour)},
+                {__escape_sql(a.monday_end_hour)},
+                {__escape_sql(a.tuesday_start_hour)},
+                {__escape_sql(a.tuesday_end_hour)},
+                {__escape_sql(a.wednesday_start_hour)},
+                {__escape_sql(a.wednesday_end_hour)},
+                {__escape_sql(a.thursday_start_hour)},
+                {__escape_sql(a.thursday_end_hour)},
+                {__escape_sql(a.friday_start_hour)},
+                {__escape_sql(a.friday_end_hour)},
+                {__escape_sql(a.saturday_start_hour)},
+                {__escape_sql(a.saturday_end_hour)},
+                {__escape_sql(a.content)},
+                {__escape_sql(a.embedding)}
+            )""" for a in amenities]
         await execute_sql(f"""INSERT INTO amenities VALUES {", ".join(values)}""")
         print("Amenities table initialized")
 
-        # If the table already exists, drop it to avoid conflicts
-        await execute_sql("DROP TABLE IF EXISTS flights CASCADE")
+        if db_type == "mysql":
+            await execute_sql("DROP TABLE IF EXISTS flights")
+        else:
+            await execute_sql("DROP TABLE IF EXISTS flights CASCADE")
         # Create a new table
         await execute_sql("""
             CREATE TABLE flights(
@@ -194,8 +243,10 @@ async def initialize_data(
         await execute_sql(f"""INSERT INTO flights VALUES {", ".join(values)}""")
         print("Flights table initialized")
 
-        # If the table already exists, drop it to avoid conflicts
-        await execute_sql("DROP TABLE IF EXISTS tickets CASCADE")
+        if db_type == "mysql":
+            await execute_sql("DROP TABLE IF EXISTS tickets")
+        else:
+            await execute_sql("DROP TABLE IF EXISTS tickets CASCADE")
         # Create a new table
         await execute_sql("""
             CREATE TABLE tickets(
@@ -212,22 +263,32 @@ async def initialize_data(
         """)
         print("Tickets table initialized")
 
-        # If the table already exists, drop it to avoid conflicts
-        await execute_sql("DROP TABLE IF EXISTS policies CASCADE")
+        if db_type == "mysql":
+            await execute_sql("DROP TABLE IF EXISTS policies")
+        else:
+            await execute_sql("DROP TABLE IF EXISTS policies CASCADE")
+
         # Create a new table
-        await execute_sql("""
+        await execute_sql(f"""
             CREATE TABLE policies(
                 id INT PRIMARY KEY,
                 content TEXT NOT NULL,
-                embedding vector(3072) NOT NULL
+                embedding {embedding_type} NOT NULL
             )
         """)
         # Insert all the data
-        values = [f"""(
-            {__escape_sql(p.id)},
-            {__escape_sql(p.content)},
-            {__escape_sql(p.embedding)}
-        )""" for p in policies]
+        if db_type == "mysql":
+            values = [f"""(
+                {__escape_sql(p.id)},
+                {__escape_sql(p.content)},
+                string_to_vector({__escape_sql(p.embedding)})
+            )""" for p in policies]
+        else:
+            values = [f"""(
+                {__escape_sql(p.id)},
+                {__escape_sql(p.content)},
+                {__escape_sql(p.embedding)}
+            )""" for p in policies]
         await execute_sql(f"""INSERT INTO policies VALUES {", ".join(values)}""")
         print("Policies table initialized")
 
